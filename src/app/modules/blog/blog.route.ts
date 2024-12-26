@@ -11,7 +11,7 @@ const router = express.Router();
 router.get("/", BlogControllers.getBlogs);
 
 router.post("/", 
-auth(USER_ROLE.admin, USER_ROLE.user), validateRequest(BlogValidation.blogCreateValidationSchema), BlogControllers.createBlog);
+auth(USER_ROLE.user), validateRequest(BlogValidation.blogCreateValidationSchema), BlogControllers.createBlog);
 
 router.patch("/:id", 
 auth(USER_ROLE.user), validateRequest(BlogValidation.blogUpdateValidationSchema), BlogControllers.updateBlog);

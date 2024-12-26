@@ -65,12 +65,14 @@ Delete Blog
     Allows an admin to delete any blog.
 
 **Authentication**
+
 JWT Authentication
 
     Users must log in to perform CRUD operations on blogs.
     Upon successful login, a JWT token is generated, which must be included in the Authorization header of subsequent requests.
 
 **Models**
+
 User Model
 
 The User model includes properties for the user's name, email, password, role (admin or user), and a flag indicating if the user is blocked.

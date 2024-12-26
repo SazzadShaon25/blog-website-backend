@@ -1,43 +1,41 @@
 import { model, Schema } from "mongoose";
-import { TUser } from "./User.interface";
+import { TUser } from "./user.interface";
 import bcrypt from "bcrypt"
 
 
-const userSchema = new Schema <TUser>({
-    id: {
+const userSchema = new Schema<TUser>({
+    name:{
+        type: String,
+        required: true
+    },
+    email:{
         type: String,
         required: true,
         unique: true
     },
     password:{
         type: String,
-        required: true
-    },
-    needsPasswordChnage:{
-        type: Boolean,
-        default: true
+        select: 0,
+        required: true,
     },
     role:{
         type: String,
-        enum: ['admin', 'faculty', 'student']
+        enum: ['admin', 'user'],
+        default: 'user'
     },
-    status: {
-        type: String,
-        enum: ['in-progress', 'blocked'],
-        default: 'in-progress'
-    },
-    isDeleted:{
+    isBlocked:{
         type: Boolean,
         default: false
-    },
+    }
 },
 {
     timestamps: true
 }
 );
+
+
 userSchema.pre('save', async function (next) {
     const user = this;
-    // hasing password and save into db
     user.password = await bcrypt.hash(
         user.password,
         Number(12)
@@ -45,10 +43,9 @@ userSchema.pre('save', async function (next) {
     next();
 });
 
-//set "" after saving password
 userSchema.post('save', function(doc, next){
     doc.password = "";
     next();
 });
 
-export const User = model<TUser>('User', userSchema)
+export const User = model<TUser>('User', userSchema);

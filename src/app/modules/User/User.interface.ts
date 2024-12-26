@@ -1,14 +1,11 @@
-export  type TUser = {
-    id: string;
-    password: string;
-    needsPasswordChnage: boolean;
-    role: 'admin' | 'student' | 'faculty';
-    status: 'in-progress' | 'blocked';
-    isDeleted: boolean;
-}
+import { USER_ROLE } from "./user.contant";
 
-export type NewUser = {
-    id: string;
+export type TUser ={
+    name: string;
+    email: string;
     password: string;
-    role: string
-}
+    role?: "admin" | "user";
+    isBlocked?: boolean;
+};
+
+export type TUserRole = keyof typeof USER_ROLE;  

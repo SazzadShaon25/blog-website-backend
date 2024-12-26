@@ -18,7 +18,7 @@ const port = 5000;
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            yield mongoose_1.default.connect('mongodb+srv://mongoose:oRdevHrHQs7cLli7@cluster0.richl.mongodb.net/mongoose-first-project?retryWrites=true&w=majority&appName=Cluster0');
+            yield mongoose_1.default.connect('mongodb+srv://mongoose:oRdevHrHQs7cLli7@cluster0.richl.mongodb.net/blogging-website?retryWrites=true&w=majority&appName=Cluster0');
             app_1.default.listen(port, () => {
                 console.log(`Example app listening on port ${port}`);
             });

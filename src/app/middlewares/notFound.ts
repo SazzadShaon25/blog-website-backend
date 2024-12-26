@@ -1,12 +1,12 @@
-import { NextFunction, Request, Response } from "express";
+import { Request, Response, NextFunction, RequestHandler } from "express";
 
+// Handle 404 (Not Found) as a middleware
+const notFound: RequestHandler = (req: Request, res: Response, next: NextFunction) => {
+   res.status(404).json({
+    success: false,
+    message: "API Not Found",
+    error: ""
+  });
+};
 
-const notFound = (req: Request, res: Response, next: NextFunction)=>{
-   
-    return res.status(404).json({
-      success: false,
-      message:"API Not Found",
-      error: ""
-    });
-  }
-  export default notFound;
+export default notFound;

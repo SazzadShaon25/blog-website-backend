@@ -9,8 +9,8 @@ class QueryBuilder<T>{
     };
 
     search(searchableFields: string []){
-        const searchTerm = this?.query?.searchTerm;
-        if(this?.query?.searchTerm){
+        const searchTerm = this?.query?.search;
+        if(searchTerm){
             this.modelQuery = this.modelQuery.find({
                 $or: searchableFields.map
                 ((field) =>({
@@ -22,41 +22,30 @@ class QueryBuilder<T>{
        return this; 
     }
 
-    filter(){
-        const queryObj = {...this.query};
-        const excludeFields = ['searchTerm', 'sort', 'limit', 'page', 'fields'];
-
-        excludeFields.forEach(el => delete queryObj[el]);
-
+    filter() {
+        const queryObj = { ...this.query };
+        const excludeFields = ['search', 'sortBy', 'sortOrder'];
+    
+        excludeFields.forEach((el) => delete queryObj[el]);
+    
+        if (this.query.filter) {
+            const authorId = this.query.filter;  
+            queryObj.author = authorId; 
+        }
+    
         this.modelQuery = this.modelQuery.find(queryObj);
-
         return this;
-    }
-
-    //sorting
-    sort(){
-        const sort = (this?.query?.sort as string)?.split(',')?.join(' ') || '-createdAt';
-        this.modelQuery = this.modelQuery.sort(sort as string);
-        return this;
-    }
-
-    paginate(){
-        const page = Number(this?.query?.page) || 1; // SET DEFAULT VALUE FOR PAGE 
-        const limit = Number(this?.query?.limit) || 10; // SET DEFAULT VALUE FOR LIMIT 
-        const skip = (page-1)*limit; // SET DEFAULT VALUE FOR SKIP
-
-        this.modelQuery = this.modelQuery.skip(skip).limit(limit);
-
-        return this;
-    }
-
-    fields(){
-       const fields = (this?.query?.fields as string)?.split(',')?.join(' ') || '-__V';
-       this.modelQuery = this.modelQuery.select(fields);
-       
-       return this;
     }
     
+
+    // sorting
+    sort(){
+        const sortByField = this?.query?.sortBy ? this.query.sortBy as string : 'createdAt';
+        const sortOrder = this?.query?.sortOrder === 'asc' ? '' : '-';
+        const sort = `${sortOrder}${sortByField}`;
+        this.modelQuery = this.modelQuery.sort(sort);
+        return this;
+    }
 }
 
 export default QueryBuilder;

@@ -1,48 +1,32 @@
 import { RequestHandler } from "express";
-import { UserServices } from "./User.service";
-import sendResponse from "../../utils/sendResponse";
 import catchAsync from "../../utils/catchAsync";
+import sendResponse from "../../utils/sendResponse";
+import { UserServices } from "./user.service";
 
-const createStudent: RequestHandler = catchAsync(async(req, res, next)=>{
-    const {password, student} = req.body;
-    const result = await UserServices.createStudentInToDB(password, student);
+const blockUser: RequestHandler = catchAsync(async(req, res, next)=>{
+    const userId = req.params.userId;
+    console.log(req.params);
+    await UserServices.blockUser(userId);
+
     sendResponse(res, {
         statusCode: 200,
         success: true,
-        message: "created student successfully",
-        data: result,
+        message: "User blocked successfully",
     });
-})
+});
 
-const createFaculty = catchAsync(async (req, res) => {
-    const { password, faculty: facultyData } = req.body;
-  
-    const result = await UserServices.createFacultyIntoDB(password, facultyData);
-  
-    sendResponse(res, {
-      statusCode: 200,
-      success: true,
-      message: 'Faculty is created succesfully',
-      data: result,
-    });
-  });
-  
-  const createAdmin = catchAsync(async (req, res) => {
-    const { password, admin: adminData } = req.body;
-  
-    const result = await UserServices.createAdminIntoDB(password, adminData);
-  
-    sendResponse(res, {
-      statusCode: 200,
-      success: true,
-      message: 'Admin is created succesfully',
-      data: result,
-    });
-  });
-  
-  export const UserControllers = {
-    createStudent,
-    createFaculty,
-    createAdmin,
-  };
+const deleteBlog: RequestHandler = catchAsync(async(req, res, next)=>{
+    const id = req.params.id;
+    const result = await UserServices.deleteBlogFromDb( id);
 
+    sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: "Blog deleted successfully",
+    });
+});
+
+export const UserControllers = {
+    blockUser,
+    deleteBlog
+}

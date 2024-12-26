@@ -1,14 +1,15 @@
-import { NextFunction, Request, Response } from "express";
+import { Response } from "express";
 
 const sendResponse = <T>(res: Response, data: {
     statusCode: number,
     success:boolean,
     message?: string,
-    data: T
+    data?: T
 })=>{
     res.status(data?.statusCode).json({
         success: data.success,
         message: data.message,
+        statusCode: data.statusCode,
         data: data.data
     })
 }

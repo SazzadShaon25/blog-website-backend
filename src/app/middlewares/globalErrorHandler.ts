@@ -1,68 +1,64 @@
-import { NextFunction, Request, Response } from "express";
-import { ZodError, ZodIssue } from "zod";
+import { ErrorRequestHandler, NextFunction, Request, Response } from "express";
+import { ZodError } from "zod";
 import { TErrorSources } from "../interface/error";
 import { errorHandler } from "../errors/handleZodError";
 import handleValidationError from "./handleValidationError";
-import handleCastError from "./handleCastError";
-import handleDuplicateError from "./handleDuplicateError";
 import AppError from "../errors/AppError";
 
+const globalErrorHandler: ErrorRequestHandler = (
+  error: any,
+  req: Request,
+  res: Response,
+  next: NextFunction
+): void => {
+  let statusCode = 500; // Default status code for internal server error
+  let message = "Something went wrong"; // Default error message
+  let errorDetails: any = {};
 
-const globalErrorHandler = (error: any, req: Request, res: Response, next: NextFunction)=>{
-    let statusCode = 500;
-    let message = "something went wrong";
-
-    let errorSources : TErrorSources = [
+  // Handle Zod Validation Error
+  if (error instanceof ZodError) {
+    const simplifiedError = errorHandler(error);
+    statusCode = simplifiedError?.statusCode || 400;
+    message = "Validation error";
+    errorDetails = simplifiedError?.errorSources || [];
+  } 
+  // Handle Mongoose Validation Error
+  else if (error?.name === "ValidationError") {
+    const simplifiedError = handleValidationError(error);
+    statusCode = simplifiedError?.statusCode || 400;
+    message = "Validation error";
+    errorDetails = simplifiedError?.errorSources || [];
+  } 
+  // Handle Custom Application Error
+  else if (error instanceof AppError) {
+    statusCode = error?.statusCode || 400;
+    message = error?.message || "Application error";
+    errorDetails = [
       {
         path: "",
-        message: "something went wrong"
-      }
+        message: error?.message,
+      },
     ];
-
-
-    if(error instanceof ZodError)
-    {
-      const simplifiedError = errorHandler(error);
-      statusCode = simplifiedError?.statusCode;
-      message = simplifiedError?.message;
-      errorSources = simplifiedError?.errorSources;
-    }else if(error?.name === "ValidationError")
-    {
-      const simplifiedError = handleValidationError(error);
-      statusCode = simplifiedError?.statusCode;
-      message = simplifiedError?.message;
-      errorSources = simplifiedError?.errorSources;
-    }else if(error?.name === "CastError")
-    {
-      const simplifiedError = handleCastError(error);
-      statusCode = simplifiedError?.statusCode;
-      message = simplifiedError?.message;
-      errorSources = simplifiedError?.errorSources; 
-    }else if (error?.code === 11000) {
-      const simplifiedError = handleDuplicateError(error);
-      statusCode = simplifiedError?.statusCode;
-      message = simplifiedError?.message;
-      errorSources = simplifiedError?.errorSources;
-    }else if (error instanceof AppError) {
-      statusCode = error?.statusCode;
-      message = error?.message;
-      errorSources = [{
+  } 
+  // Handle General Errors
+  else if (error instanceof Error) {
+    message = error?.message || "Internal server error";
+    errorDetails = [
+      {
         path: "",
-        message: error?.message
-      }];
-    }else if (error instanceof Error) {
-      message = error?.message;
-      errorSources = [{
-        path: "",
-        message: error?.message
-      }];
-    };
+        message: error?.message,
+      },
+    ];
+  }
 
-    return res.status(statusCode).json({
+
+   res.status(statusCode).json({
     success: false,
     message,
-    errorSources,
-    stack: error?.stack
-    });
-  }
-  export default globalErrorHandler;
+    statusCode,
+    error: { details: errorDetails },
+    stack: error?.stack,
+  });
+};
+
+export default globalErrorHandler;
